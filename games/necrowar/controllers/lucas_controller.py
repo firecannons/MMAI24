@@ -25,9 +25,11 @@ if DRAW == True:
     UNIT_SPAWN_COLOR = ( 255, 255, 0 )
     RED_UNIT_COLOR = ( 255 , 0 , 0 )
     BLUE_UNIT_COLOR = ( 0 , 0 , 255 )
+    UNIT_TEXT_COLOR = ( 0 , 0 , 0 )
 
     pygame . init ( )
     screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
+    unit_font = pygame.font.SysFont("comicsansms", 20)
 
 def draw(game):
     global Game
@@ -65,6 +67,8 @@ def draw_map():
                     TileColor = BLUE_UNIT_COLOR
                 else:
                     TileColor = RED_UNIT_COLOR
+                unit_text = unit_font.render(getGame().tiles[x + y * MAP_WIDTH].unit.job.title[0], True, UNIT_TEXT_COLOR)
+                screen.blit(text, (TileDimension * x, TileDimension * y))
             TileRect = pygame.Rect(TileDimension * x, TileDimension * y, TileDimension * x + TileDimension, TileDimension * y + TileDimension)
             pygame.draw.rect(screen, TileColor, TileRect)
     pygame.display.flip()
