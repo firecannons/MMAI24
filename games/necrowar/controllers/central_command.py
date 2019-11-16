@@ -150,10 +150,10 @@ class BaseController():
         g_score[start] = 0
         f_score = defaultdict(lambda: np.inf)
         f_score[start] = f_metric(start, goal)
-        priority_queue = [(f_score[start], start)]
+        priority_queue = [(f_score[start], start.id, start)]
 
         while priority_queue:
-            f_score, current_tile = heapq.heappop(priority_queue)
+            _, ident, current_tile = heapq.heappop(priority_queue)
 
             if current_tile == goal:
                 return self._reconstruct_path(current_tile, came_from)
@@ -164,11 +164,12 @@ class BaseController():
                 if score < g_score[neighbor]:
                     came_from[neighbor] = current_tile
                     g_score[neighbor] = score
+                    print(f_score[neighbor])
                     f_score[neighbor] = g_score[neighbor] + f_metric(current_tile, neighbor)
                     
                     if neighbor not in visited:
                         visited.add(neighbor.id)
-                        heapq.heappush((f_score[neighbor], neighbor))
+                        heapq.heappush(priority_queue, (f_score[neighbor], neighbor.id, neighbor))
             
         return []
 
