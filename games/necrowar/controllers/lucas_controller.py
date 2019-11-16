@@ -9,6 +9,7 @@ if DRAW == True:
 
     import pygame
     import math
+    clock = pygame.time.Clock()
 
     MAP_WIDTH = 63
     MAP_HEIGHT = 32
@@ -74,3 +75,4 @@ class LucasController(BaseController):
                 TileRect = pygame.Rect(TileDimension * x, TileDimension * y, TileDimension * x + TileDimension, TileDimension * y + TileDimension)
                 pygame.draw.rect(screen, TileColor, TileRect)
         pygame.display.flip()
+        clock.tick(60)
