@@ -14,3 +14,6 @@ class ChrisController(BaseController):
         
         if not self.num_units:
             self.spawn_unit(UnitTypes.WORKER)
+
+        for worker in self.workers:
+            self.move_unit(worker, self.get_closest_gold_mine(worker))

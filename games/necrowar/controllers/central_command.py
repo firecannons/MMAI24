@@ -39,26 +39,27 @@ class BaseController():
         self._controllers = []
         self._worker_spawners = []
         self._unit_spawners = []
+        self._gold_mines = []
+        self._gold_mine_coordinates = []
+        self._units = defaultdict(list)
 
         for tile in game.tiles:
             if self.can_spawn_worker(tile):
                 self._worker_spawners.append(tile)
             if self.can_spawn_unit(tile):
                 self._unit_spawners.append(tile)
+            if self.is_gold_mine(tile):
+                self._gold_mines.append(tile)
+                self._gold_mine_coordinates.append([tile.x, tile.y])
     
-    def find_closest_gold_mine(self):
-        gold_mines = self.find_gold_mines()
-        min_distance = 9999
-        for gold_mine in gold_mines:
-            # fill in with pathfinding code
-            pass
+        self._gold_mine_coordinates = np.asarray(self._gold_mine_coordinates)
     
-    def find_gold_mines(self):
-        tiles = []
-        for tile in self.game.tiles:
-            if tile.is_gold_mine == True:
-                tiles.append(tile)
-        return tiles
+    def get_closest_gold_mine(self, unit):
+        tile = self.get_tile_from(unit)
+        coords = np.array([[tile.x, tile.y]])
+        dist = np.sum(np.abs(coords - self._gold_mine_coordinates), axis=1)
+        closest_idx = np.argmin(dist)
+        return self._gold_mines[closest_idx]
     
     def can_afford_unit(self, job):
         output = False
@@ -71,7 +72,10 @@ class BaseController():
     
     def can_spawn_unit(self, tile):
         return tile.owner == self.player and tile.is_unit_spawn
-    
+
+    def is_gold_mine(self, tile):
+        return tile.is_gold_mine
+        
     @property
     def logger(self):
         return self._logger
@@ -87,6 +91,10 @@ class BaseController():
     @property
     def num_units(self):
         return len(self.player.units)
+
+    @property
+    def workers(self):
+        return self._units[UnitTypes.WORKER]
 
     @property
     def controllers(self):
@@ -129,12 +137,14 @@ class BaseController():
     def distance(self, start, goal):
         return np.abs(start.x-goal.x) + np.abs(start.y-goal.y)
 
-    def _reconstruct_path(self, current_tile, came_from):
+    def _reconstruct_path(self, current_tile, came_from, start):
         path = [current_tile]
 
         while current_tile in came_from:
             current_tile = came_from[current_tile]
-            path.insert(0, current_tile)
+
+            if current_tile != start:
+                path.insert(0, current_tile)
     
         return path
     
@@ -150,13 +160,13 @@ class BaseController():
         g_score[start] = 0
         f_score = defaultdict(lambda: np.inf)
         f_score[start] = f_metric(start, goal)
-        priority_queue = [(f_score[start], start)]
+        priority_queue = [(f_score[start], start.id, start)]
 
         while priority_queue:
-            f_score, current_tile = heapq.heappop(priority_queue)
+            _, tile_id, current_tile = heapq.heappop(priority_queue)
 
             if current_tile == goal:
-                return self._reconstruct_path(current_tile, came_from)
+                return self._reconstruct_path(current_tile, came_from, start)
             
             for neighbor in current_tile.get_neighbors():
                 score = g_score[current_tile] + self.move_cost(start, goal)
@@ -168,14 +178,14 @@ class BaseController():
                     
                     if neighbor not in visited:
                         visited.add(neighbor.id)
-                        heapq.heappush((f_score[neighbor], neighbor))
+                        heapq.heappush(priority_queue, (f_score[neighbor], neighbor.id, neighbor))
             
         return []
 
     def move_unit(self, unit: Unit, goal, number_of_moves=None):
         path = self.find_path(unit, goal)
         i = 0
-
+    
         for i in range(len(path)):
             if unit.moves <= 0:
                 break
@@ -202,6 +212,7 @@ class BaseController():
 
             if unit_was_spawned:
                 self.logger.info('Unit spawned successfully.')
+                self._units[unit_type].append(where.unit)
             else:
                 self.logger.warn('Failed to spawn unit.')
         else:
