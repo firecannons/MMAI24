@@ -54,7 +54,7 @@ class BaseController():
     
     def find_gold_mines(self):
         tiles = []
-        for tile in game.tiles:
+        for tile in self.game.tiles:
             if tile.is_gold_mine == True:
                 tiles.append(tile)
         return tiles
