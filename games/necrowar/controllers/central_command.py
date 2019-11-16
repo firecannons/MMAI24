@@ -174,6 +174,7 @@ class BaseController():
                 if score < g_score[neighbor]:
                     came_from[neighbor] = current_tile
                     g_score[neighbor] = score
+                    print(f_score[neighbor])
                     f_score[neighbor] = g_score[neighbor] + f_metric(current_tile, neighbor)
                     
                     if neighbor not in visited:
