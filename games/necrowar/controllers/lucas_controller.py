@@ -3,7 +3,7 @@ from ..game import Game
 from ..player import Player
 from .central_command import BaseController
 
-DRAW = True
+DRAW = False
 
 if DRAW == True:
 

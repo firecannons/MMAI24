@@ -1,8 +1,12 @@
 import logging
+import heapq
+import numpy as np
 from enum import Enum, auto
+from collections import defaultdict
 from ..game import Game
 from ..tile import Tile
 from ..player import Player
+
 
 class UnitTypes(Enum):
     WORKER = auto()
@@ -90,6 +94,63 @@ class BaseController():
             
         return None
 
+    def get_tile_from(self, object):
+        if hasattr(object, 'tile'):
+            return object.tile
+        elif isinstance(object, Tile):
+            return object
+        
+        return None
+
+    def move_cost(self, start, goal):
+        return 1
+
+    def distance(self, start, goal):
+        return np.abs(start.x-goal.x) + np.abs(start.y-goal.y)
+
+    def _reconstruct_path(self, current_tile, came_from):
+        path = [current_tile]
+
+        while current_tile in came_from:
+            current_tile = came_from[current_tile]
+            path.insert(0, current_tile)
+    
+        return path
+    
+    def find_path(self, start, goal, f_metric=None):
+        f_metric = f_metric if f_metric else distance
+        
+        start = self.get_tile_from(start)
+        goal = self.get_tile_from(goal)
+        visited = set(start)
+
+        came_from = {}
+        g_score = defaultdict(lambda: np.inf)
+        g_score[start] = 0
+        f_score = defaultdict(lambda: np.inf)
+        f_score[start] = f_metric(start, goal)
+        priority_queue = [(f_score[start], start)]
+
+        while priority_queue:
+            f_score, current_tile = heapq.heappop(priority_queue)
+
+            if current_tile == goal:
+                return self._reconstruct_path(current_tile, came_from)
+            
+            for neighbor in current_tile.get_neighbors():
+                score = g_score[current_tile] + self.move_cost(start, goal)
+
+                if score < g_score[neighbor]:
+                    came_from[neighbor] = current_tile
+                    g_score[neighbor] = score
+                    f_score[neighbor] = g_score[neighbor] + f_metric(current_tile, neighbor)
+                    
+                    if neighbor not in visited:
+                        visited.add(neighbor)
+                        heapq.heappush((f_score[neighbor], neighbor))
+            
+        return []
+
     def spawn_unit(self, unit_type: UnitTypes, where=None):
         where: Tile = where if where is not None else \
                                     self.select_spawner_for_unit(unit_type)
@@ -110,3 +171,5 @@ class BaseController():
                 self.logger.warn('Failed to spawn unit.')
         else:
             self.logger.warn('No base was found for the current player.')
+
+        return where

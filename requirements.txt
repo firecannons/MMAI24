@@ -3,3 +3,4 @@ coloredlogs==10.0
 colorama==0.4.1
 PyYAML==5.1.2
 pygame==1.9.4
+numpy==1.17.1
