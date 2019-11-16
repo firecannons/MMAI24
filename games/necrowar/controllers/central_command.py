@@ -6,6 +6,7 @@ from collections import defaultdict
 from ..game import Game
 from ..tile import Tile
 from ..player import Player
+from ..unit import Unit
 
 
 class UnitTypes(Enum):
@@ -138,7 +139,7 @@ class BaseController():
         return path
     
     def find_path(self, start, goal, f_metric=None):
-        f_metric = f_metric if f_metric else distance
+        f_metric = f_metric if f_metric else self.distance
         
         start = self.get_tile_from(start)
         goal = self.get_tile_from(goal)
@@ -170,6 +171,20 @@ class BaseController():
                         heapq.heappush((f_score[neighbor], neighbor))
             
         return []
+
+    def move_unit(self, unit: Unit, goal, number_of_moves=None):
+        path = self.find_path(unit, goal)
+        i = 0
+
+        for i in range(len(path)):
+            if unit.moves <= 0:
+                break
+        
+            if not unit.move(path[i]):
+                self.logger.warn(f'Failed to move unit `{unit.id}`.')
+                break
+            else:
+                self.logger.info(f'Sucessfully moved unit of type `{unit.job.title}`')
 
     def spawn_unit(self, unit_type: UnitTypes, where=None):
         where: Tile = where if where is not None else \
