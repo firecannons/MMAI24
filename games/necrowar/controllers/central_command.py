@@ -120,7 +120,7 @@ class BaseController():
             controller.run_turn()
 
     def select_spawner_for_unit(self, unit_type: UnitTypes):
-        if unit_type == UnitTypes.WORKER and self.workers_spawners:
+        if unit_type == UnitTypes.WORKER and self.worker_spawners:
             return self.worker_spawners[0]
         elif self.unit_spawners:
             return self.unit_spawners[0]
@@ -191,6 +191,7 @@ class BaseController():
 
     def move_unit(self, unit: Unit, goal, number_of_moves=None):
         path = self.find_path(unit, goal)
+        print(path)
         i = 0
     
         for i in range(len(path)):
