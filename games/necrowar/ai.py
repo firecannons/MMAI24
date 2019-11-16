@@ -3,6 +3,7 @@
 from joueur.base_ai import BaseAI
 from .util.logger import Logger, LoggerTypes
 from .controllers.central_command import BaseController
+from .controllers.chris_controller import ChrisController
 logger = Logger.get(LoggerTypes.DEVELOP)
 
 # <<-- Creer-Merge: imports -->> - Code you add between this comment and the end comment will be preserved between Creer re-runs.
@@ -47,9 +48,19 @@ class AI(BaseAI):
         """ This is called once the game starts and your AI knows its player and
             game. You can initialize your AI here.
         """
-        
-        self._base_controller = BaseController(logger, self.game, self.player)
 
+        controller_args = (logger, self.game, self.player)
+        controller_types = (BaseController, ChrisController)
+        controllers = []
+        
+        for controller_type in controller_types:
+            controllers.append(controller_type(*controller_args))
+
+        self._base_controller: BaseController = controllers[0] 
+
+        for i in range(1, len(controllers)):
+            self.base_controller.add_controller(controllers[i])
+        
     def game_updated(self):
         """ This is called every time the game's state updates, so if you are
         tracking anything you can update it here.
@@ -76,10 +87,9 @@ class AI(BaseAI):
         Returns:
             bool: Represents if you want to end your turn. True means end your turn, False means to keep your turn going and re-call this function.
         """
-        # <<-- Creer-Merge: runTurn -->> - Code you add between this comment and the end comment will be preserved between Creer re-runs.
-        # Put your game logic here for runTurn
+
+        self.base_controller.run_turn()
         return True
-        # <<-- /Creer-Merge: runTurn -->>
 
     def find_path(self, start, goal):
         """A very basic path finding algorithm (Breadth First Search) that when
