@@ -1,6 +1,8 @@
 # This is where you build your AI for the Necrowar game.
 
 from joueur.base_ai import BaseAI
+from .util.logger import Logger, LoggerTypes
+logger = Logger.get(LoggerTypes.DEVELOP)
 
 # <<-- Creer-Merge: imports -->> - Code you add between this comment and the end comment will be preserved between Creer re-runs.
 # you can add additional import(s) here
@@ -33,13 +35,14 @@ class AI(BaseAI):
             str: The name of your Player.
         """
         # <<-- Creer-Merge: get-name -->> - Code you add between this comment and the end comment will be preserved between Creer re-runs.
-        return "Necrowar Python Player" # REPLACE THIS WITH YOUR TEAM NAME
+        return "MSWord2012" # REPLACE THIS WITH YOUR TEAM NAME
         # <<-- /Creer-Merge: get-name -->>
 
     def start(self):
         """ This is called once the game starts and your AI knows its player and
             game. You can initialize your AI here.
         """
+        logger.info(f'Starting game as {self.get_name()}.')
         # <<-- Creer-Merge: start -->> - Code you add between this comment and the end comment will be preserved between Creer re-runs.
         # replace with your start logic
         # <<-- /Creer-Merge: start -->>

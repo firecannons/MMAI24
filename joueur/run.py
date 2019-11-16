@@ -66,7 +66,7 @@ def run(args):
 
     lobby_data = joueur.client.wait_for_event("lobbied")
 
-    if lobby_data['gameVersion'] != module.game_version:
+    if False:
         print("""{}WARNING: Game versions do not match.
 -> Your local game version is:     {}
 -> Game Server's game version is:  {}
