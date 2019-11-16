@@ -42,6 +42,10 @@ class BaseController():
         self._gold_mines = []
         self._gold_mine_coordinates = []
         self._units = defaultdict(list)
+        self._jobs_by_title = {}
+
+        for job in game.unit_jobs:
+            self._jobs_by_title[job.title] = job
 
         for tile in game.tiles:
             if self.can_spawn_worker(tile):
@@ -53,7 +57,7 @@ class BaseController():
                 self._gold_mine_coordinates.append([tile.x, tile.y])
     
         self._gold_mine_coordinates = np.asarray(self._gold_mine_coordinates)
-    
+
     def get_closest_gold_mine(self, unit):
         tile = self.get_tile_from(unit)
         coords = np.array([[tile.x, tile.y]])
@@ -101,7 +105,7 @@ class BaseController():
         return self._controllers
 
     @property
-    def workers_spawners(self):
+    def worker_spawners(self):
         return self._worker_spawners
 
     @property
@@ -117,7 +121,7 @@ class BaseController():
 
     def select_spawner_for_unit(self, unit_type: UnitTypes):
         if unit_type == UnitTypes.WORKER and self.workers_spawners:
-            return self.workers_spawners[0]
+            return self.worker_spawners[0]
         elif self.unit_spawners:
             return self.unit_spawners[0]
             
@@ -133,6 +137,9 @@ class BaseController():
 
     def move_cost(self, start, goal):
         return 1
+
+    def distance_vectorized(self, start_coords, goal_cooords):
+        dist = np.sum(np.abs(start_coords - goal_cooords), axis=1)
 
     def distance(self, start, goal):
         return np.abs(start.x-goal.x) + np.abs(start.y-goal.y)
@@ -174,7 +181,6 @@ class BaseController():
                 if score < g_score[neighbor]:
                     came_from[neighbor] = current_tile
                     g_score[neighbor] = score
-                    print(f_score[neighbor])
                     f_score[neighbor] = g_score[neighbor] + f_metric(current_tile, neighbor)
                     
                     if neighbor not in visited:
@@ -220,3 +226,7 @@ class BaseController():
             self.logger.warn('No base was found for the current player.')
 
         return where
+
+
+    def get_units(self, unit_type: UnitTypes):
+        return self._units[unit_type]
