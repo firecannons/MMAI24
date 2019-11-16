@@ -9,9 +9,3 @@ class LucasController(BaseController):
 
     def run_turn(self):
         self.logger.info(f'Hello from Lucas!')
-    
-    def can_afford_unit(self, job):
-        output = False
-        if self.player.gold >= job.gold_cost and self.player.mana >= job.mana_cost:
-            output = True
-        return output

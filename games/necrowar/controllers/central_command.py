@@ -41,6 +41,26 @@ class BaseController():
             if self.can_spawn_unit(tile):
                 self._unit_spawners.append(tile)
     
+    def find_closest_gold_mine(self):
+        gold_mines = self.find_gold_mines()
+        min_distance = 9999
+        for gold_mine in gold_mines:
+            # fill in with pathfinding code
+            pass
+    
+    def find_gold_mines(self):
+        tiles = []
+        for tile in game.tiles:
+            if tile.is_gold_mine == True:
+                tiles.append(tile)
+        return tiles
+    
+    def can_afford_unit(self, job):
+        output = False
+        if self.player.gold >= job.gold_cost and self.player.mana >= job.mana_cost:
+            output = True
+        return output
+    
     def can_spawn_worker(self, tile):
         return tile.owner == self.player and tile.is_worker_spawn
     
