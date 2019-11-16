@@ -4,6 +4,8 @@ from joueur.base_ai import BaseAI
 from .util.logger import Logger, LoggerTypes
 from .controllers.central_command import BaseController
 from .controllers.chris_controller import ChrisController
+from .controllers.lucas_controller import LucasController
+from .controllers.skyler_controller import SkylerController
 logger = Logger.get(LoggerTypes.DEVELOP)
 
 # <<-- Creer-Merge: imports -->> - Code you add between this comment and the end comment will be preserved between Creer re-runs.
@@ -50,7 +52,7 @@ class AI(BaseAI):
         """
 
         controller_args = (logger, self.game, self.player)
-        controller_types = (BaseController, ChrisController)
+        controller_types = (BaseController, ChrisController, LucasController, SkylerController)
         controllers = []
         
         for controller_type in controller_types:
