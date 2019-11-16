@@ -2,6 +2,7 @@
 
 from joueur.base_ai import BaseAI
 from .util.logger import Logger, LoggerTypes
+from .controllers.central_command import BaseController
 logger = Logger.get(LoggerTypes.DEVELOP)
 
 # <<-- Creer-Merge: imports -->> - Code you add between this comment and the end comment will be preserved between Creer re-runs.
@@ -27,6 +28,10 @@ class AI(BaseAI):
         """
         return self._player # don't directly touch this "private" variable pls
 
+    @property
+    def base_controller(self):
+        return self._base_controller
+
     def get_name(self):
         """ This is the name you send to the server so your AI will control the
             player named this string.
@@ -42,10 +47,8 @@ class AI(BaseAI):
         """ This is called once the game starts and your AI knows its player and
             game. You can initialize your AI here.
         """
-        logger.info(f'Starting game as {self.get_name()}.')
-        # <<-- Creer-Merge: start -->> - Code you add between this comment and the end comment will be preserved between Creer re-runs.
-        # replace with your start logic
-        # <<-- /Creer-Merge: start -->>
+        
+        self._base_controller = BaseController(logger, self.game, self.player)
 
     def game_updated(self):
         """ This is called every time the game's state updates, so if you are
