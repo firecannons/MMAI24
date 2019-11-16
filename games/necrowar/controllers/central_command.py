@@ -143,7 +143,7 @@ class BaseController():
         
         start = self.get_tile_from(start)
         goal = self.get_tile_from(goal)
-        visited = set(start)
+        visited = set(start.id)
 
         came_from = {}
         g_score = defaultdict(lambda: np.inf)
@@ -167,7 +167,7 @@ class BaseController():
                     f_score[neighbor] = g_score[neighbor] + f_metric(current_tile, neighbor)
                     
                     if neighbor not in visited:
-                        visited.add(neighbor)
+                        visited.add(neighbor.id)
                         heapq.heappush((f_score[neighbor], neighbor))
             
         return []
