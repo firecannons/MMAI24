@@ -21,10 +21,10 @@ class LucasController(BaseController):
         for unit in self.get_attack_units():
             for tile in unit.tile.get_neighbors():
                 if tile.tower != None:
-                    if tile.tower.owner != self.player:
+                    if tile.tower.owner != self.player and unit.acted == False:
                         unit.attack(tile)
                 if tile.unit != None:
-                    if tile.unit.owner != self.player:
+                    if tile.unit.owner != self.player and unit.acted == False:
                         unit.attack(tile)
 
     def run_turn(self):
@@ -32,11 +32,11 @@ class LucasController(BaseController):
         self.control_builders()
         self.control_miners()
         self.control_fishers()
-        while self.can_afford_unit(self._jobs_by_title[str(UnitTypes.WORKER)]) and len(self.miners) < 7:
+        while self.can_afford_unit(self._jobs_by_title[str(UnitTypes.WORKER)]) and len(self.miners) < 7 and self.select_spawner_for_unit(UnitTypes.WORKER).unit == None:
             self.spawn_miner()
             self.control_miners()
         self.control_miners()
-        while self.can_afford_unit(self._jobs_by_title[str(UnitTypes.WORKER)]) and len(self.fishers) < 5:
+        while self.can_afford_unit(self._jobs_by_title[str(UnitTypes.WORKER)]) and len(self.fishers) < 5 and self.select_spawner_for_unit(UnitTypes.WORKER).unit == None:
             self.spawn_fisher()
             self.control_fishers()
         self.control_fishers()

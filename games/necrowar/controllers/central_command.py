@@ -208,9 +208,12 @@ class BaseController():
             
             if worker.tile.is_gold_mine == True or worker.tile.is_island_gold_mine == True:
                 worker.mine(worker.tile)
-            if worker.tile.is_gold_mine == False and worker.tile.is_island_gold_mine == False and worker.moves > 0:
+            
+            if self.game.river_phase <= 2:
+                self.move_unit(worker, self.select_spawner_for_unit(worker.job.title))
+            elif worker.tile.is_gold_mine == False and worker.tile.is_island_gold_mine == False:
                 self.move_unit(worker, self.get_closest_gold_mine(worker))
-    
+        print('sadf')
         for dead_miner in dead_miners:
             self.miners.remove(dead_miner)
         
