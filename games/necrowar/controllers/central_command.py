@@ -74,7 +74,7 @@ class BaseController():
                 self._enemy_castle = tile
     
         self._gold_mine_coordinates = np.asarray(self._gold_mine_coordinates)
-    
+        
     def spawn_fisher(self):
         if self.can_afford_unit(self._jobs_by_title[str(UnitTypes.WORKER)]):
             tile = self.spawn_unit(UnitTypes.WORKER)
@@ -105,18 +105,37 @@ class BaseController():
             if foundwater == False:
                 self.move_unit(worker, self.find_nearest_shore(worker))
 
+    def get_unoccupied_gold_mine_coordinates(self):
+        coords = []
+        indices = []
+
+        for i, gold_mine in enumerate(self._gold_mines):
+            if gold_mine.unit is None:
+                coords.append([gold_mine.x, gold_mine.y])
+                indices.append(i)
+
+        return indices, np.asarray(coords)
     def spawn_miner(self):
         if self.can_afford_unit(self._jobs_by_title[str(UnitTypes.WORKER)]):
             tile = self.spawn_unit(UnitTypes.WORKER)
             self.miners.append(tile.unit)
 
     def control_miners(self):
+        dead_miners = []
+
         for worker in self.miners:
+            if worker.tile is None:
+                dead_miners.append(worker)
+                continue
+            
             if worker.tile.is_gold_mine == True:
                 worker.mine(worker.tile)
             if worker.tile.is_gold_mine == False and worker.tile.is_island_gold_mine == False:
                 self.move_unit(worker, self.get_closest_gold_mine(worker))
     
+        for dead_miner in dead_miners:
+            self.miners.remove(dead_miner)
+        
     def select_random_attacker_type(self):
         choice = random.choice(list(self._unit_types))
         while choice == UnitTypes.WORKER:
@@ -128,14 +147,25 @@ class BaseController():
         for unit in self.player.units:
             if unit.job.title != UnitTypes.WORKER:
                 units.append(unit)
+        
         return units
 
     def get_closest_gold_mine(self, unit):
         tile = self.get_tile_from(unit)
+
+        if self.is_gold_mine(tile) or tile is None:
+            return tile if tile is not None else unit.tile
+        
         coords = np.array([[tile.x, tile.y]])
-        dist = self.distance_vectorized(coords, self._gold_mine_coordinates)
-        closest_idx = np.argmin(dist)
-        return self._gold_mines[closest_idx]
+        indices, gold_mine_coordinates = self.get_unoccupied_gold_mine_coordinates()
+
+        if len(gold_mine_coordinates):
+            dist = self.distance_vectorized(coords, gold_mine_coordinates)
+        else:
+            dist = self.distance_vectorized(coords, self._gold_mine_coordinates)
+            return self._gold_mines[np.argmin(dist)]
+        
+        return self._gold_mines[indices[np.argmin(dist)]]
     
     def can_afford_unit(self, job):
         output = False
@@ -150,7 +180,7 @@ class BaseController():
         return tile.owner == self.player and tile.is_unit_spawn
 
     def is_gold_mine(self, tile):
-        return tile.is_gold_mine
+        return tile.is_gold_mine or tile.is_island_gold_mine
     
     def is_enemy_castle(self, tile):
         return tile.is_castle == True and tile.owner != self.player
