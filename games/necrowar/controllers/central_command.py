@@ -82,6 +82,14 @@ class BaseController():
     
         self._gold_mine_coordinates = np.asarray(self._gold_mine_coordinates)
     
+    def towers_attack(self):
+        for tower in self.player.towers:
+            for unit in self.player.opponent.units:
+                a = abs(tower.tile.x - unit.tile.x)
+                b = abs(tower.tile.y - unit.tile.y)
+                if a + b <= tower.job.range:
+                    tower.attack(unit.tile)
+    
     def select_random_tower_type(self):
         choice = random.choice(list(self._tower_types))
         while choice == 'castle':
@@ -113,17 +121,17 @@ class BaseController():
                 tile = self.game.tiles[corner_tile.x + y * self.game.map_width]
             else:
                 if corner_tile.x < self.game.map_width / 2:
-                    x = x + 1
+                    x = x + 2
                 else:
-                    x = x - 1
+                    x = x - 2
                 if self.game.tiles[x + corner_tile.y * self.game.map_width].tower == None:
                     found_tile = True
                     tile = self.game.tiles[x + corner_tile.y * self.game.map_width]
                 else:
                     if corner_tile.y < self.game.map_height / 2:
-                        y = y + 1
+                        y = y + 2
                     else:
-                        y = y - 1
+                        y = y - 2
         return tile
     
     def get_tower_corner(self, worker):
@@ -153,10 +161,10 @@ class BaseController():
             x = int(self.game._map_width / 2) - 2
         if unit.tile.y < self.game._map_height / 2:
             while self.game.tiles[x + y * self.game.map_width].unit:
-                y = y + 1
+                y = y + 2
         else:
             while self.game.tiles[x + y * self.game.map_width].unit:
-                y = y - 1
+                y = y - 2
         return self.game.tiles[x + y * self.game.map_width]
 
     def control_fishers(self):
@@ -341,6 +349,8 @@ class BaseController():
         num_unit_on_tile[UnitTypes.ZOMBIE] = tile.num_zombies
 
         if tile.unit is not None and tile.unit.job.title != str(unit_type):
+            return False
+        if tile.tower is not None:
             return False
         if not (num_unit_on_tile[unit_type] < self._jobs_by_title[str(unit_type)].per_tile):
             return False

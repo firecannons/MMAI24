@@ -29,15 +29,15 @@ class LucasController(BaseController):
 
     def run_turn(self):
         self.spawn_builder()
-        if random.randint(0,3) == 1:
+        if random.randint(0,2) == 1:
             self.spawn_fisher()
         else:
             self.spawn_miner()
-        print(self.builders, self.miners, self.fishers)
         self.control_miners()
         self.control_fishers()
         self.control_builders()
         self.spawn_attackers()
         self.move_attackers()
         self.attackers_attack()
+        self.towers_attack()
         self.logger.info(f'Hello from Lucas!')
