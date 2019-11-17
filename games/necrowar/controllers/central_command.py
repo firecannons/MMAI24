@@ -7,6 +7,7 @@ from ..game import Game
 from ..tile import Tile
 from ..player import Player
 from ..unit import Unit
+import random
 
 
 class UnitTypes(Enum):
@@ -70,6 +71,19 @@ class BaseController():
                 self._enemy_castle = tile
     
         self._gold_mine_coordinates = np.asarray(self._gold_mine_coordinates)
+    
+    def select_random_attacker_type(self):
+        choice = random.choice(list(self._unit_types))
+        while choice == UnitTypes.WORKER:
+            choice = random.choice(list(self._unit_types))
+        return choice
+    
+    def get_attack_units(self):
+        units = []
+        for unit in self.player.units:
+            if unit.job.title != UnitTypes.WORKER:
+                units.append(unit)
+        return units
 
     def get_closest_gold_mine(self, unit):
         tile = self.get_tile_from(unit)
