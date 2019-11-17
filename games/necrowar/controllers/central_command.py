@@ -206,6 +206,16 @@ class BaseController():
         return self._unit_types[unit.job.title]
 
     def can_move_unit_to(self, tile: Tile, unit_type: UnitTypes):
+        num_unit_on_tile = defaultdict(lambda: tile.unit.job.title == str(unit_type) if tile.unit is not None else 0)
+        num_unit_on_tile[UnitTypes.GHOUL] = tile.num_ghouls
+        num_unit_on_tile[UnitTypes.HOUND] = tile.num_hounds
+        num_unit_on_tile[UnitTypes.ZOMBIE] = tile.num_zombies
+
+        if tile.unit is not None and tile.unit.job.title != str(unit_type):
+            return False
+        if not (num_unit_on_tile[unit_type] < self._jobs_by_title[str(unit_type)].per_tile):
+            return False
+
         if unit_type is None:
             return True
         if unit_type != UnitTypes.WORKER:
