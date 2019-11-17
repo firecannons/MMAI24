@@ -61,7 +61,7 @@ class BaseController():
     def get_closest_gold_mine(self, unit):
         tile = self.get_tile_from(unit)
         coords = np.array([[tile.x, tile.y]])
-        dist = np.sum(np.abs(coords - self._gold_mine_coordinates), axis=1)
+        dist = self.distance_vectorized(coords, self._gold_mine_coordinates)
         closest_idx = np.argmin(dist)
         return self._gold_mines[closest_idx]
     
@@ -138,8 +138,8 @@ class BaseController():
     def move_cost(self, start, goal):
         return 1
 
-    def distance_vectorized(self, start_coords, goal_cooords):
-        dist = np.sum(np.abs(start_coords - goal_cooords), axis=1)
+    def distance_vectorized(self, start_coords, goal_coords):
+        return np.sum(np.abs(start_coords - goal_coords), axis=1)
 
     def distance(self, start, goal):
         return np.abs(start.x-goal.x) + np.abs(start.y-goal.y)
@@ -191,9 +191,11 @@ class BaseController():
 
     def move_unit(self, unit: Unit, goal, number_of_moves=None):
         path = self.find_path(unit, goal)
-        print(path)
-        i = 0
-    
+        goal = self.get_tile_from(goal)
+
+        if path and path[0] == goal:
+            return 
+        
         for i in range(len(path)):
             if unit.moves <= 0:
                 break
