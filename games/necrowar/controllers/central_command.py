@@ -17,6 +17,7 @@ class UnitTypes(Enum):
     ABOMINATION = auto()
     WRAITH = auto()
     HORSEMAN = auto()
+    reverse_mapping = None
 
     def __str__(self):
         mapping = {
@@ -28,7 +29,7 @@ class UnitTypes(Enum):
             self.WRAITH.value: 'wraith',
             self.HORSEMAN.value: 'horseman'
         }
-
+        
         return mapping.get(self.value)
 
 class BaseController():
@@ -43,6 +44,15 @@ class BaseController():
         self._gold_mine_coordinates = []
         self._units = defaultdict(list)
         self._jobs_by_title = {}
+        self._unit_types = {
+            'worker': UnitTypes.WORKER,
+            'zombie': UnitTypes.ZOMBIE,
+            'ghoul': UnitTypes.GHOUL,
+            'hound': UnitTypes.HOUND,
+            'abomination': UnitTypes.ABOMINATION,
+            'wraith': UnitTypes.WRAITH,
+            'horseman': UnitTypes.HORSEMAN
+        }
 
         for job in game.unit_jobs:
             self._jobs_by_title[job.title] = job
@@ -154,9 +164,26 @@ class BaseController():
                 path.insert(0, current_tile)
     
         return path
-    
+
+    def get_unit_type(self, unit: Unit):
+        return self._unit_types[unit.job.title]
+
+    def can_move_unit_to(self, tile: Tile, unit_type: UnitTypes):
+        if unit_type is None:
+            return True
+        if unit_type != UnitTypes.WORKER:
+            return tile.is_path
+        else:
+            return tile.is_grass or tile.is_gold_mine or tile.is_island_gold_mine
+        
     def find_path(self, start, goal, f_metric=None):
         f_metric = f_metric if f_metric else self.distance
+        unit_type = None
+
+        if isinstance(start, Unit):
+            unit_type = self.get_unit_type(start)
+        elif isinstance(start, Tile):
+            unit_type = start.unit
         
         start = self.get_tile_from(start)
         goal = self.get_tile_from(goal)
@@ -176,6 +203,9 @@ class BaseController():
                 return self._reconstruct_path(current_tile, came_from, start)
             
             for neighbor in current_tile.get_neighbors():
+                if not self.can_move_unit_to(neighbor, unit_type):
+                    continue
+                
                 score = g_score[current_tile] + self.move_cost(start, goal)
 
                 if score < g_score[neighbor]:
