@@ -81,9 +81,12 @@ class BaseController():
             tile = self.spawn_unit(UnitTypes.WORKER)
             self.miners.append(tile.unit)
 
-    def move_miners(self):
+    def control_miners(self):
         for worker in self.miners:
-            self.move_unit(worker, self.get_closest_gold_mine(worker))
+            if worker.tile.is_gold_mine == True:
+                worker.mine(worker.tile)
+            if worker.tile.is_gold_mine == False and worker.tile.is_island_gold_mine == False:
+                self.move_unit(worker, self.get_closest_gold_mine(worker))
     
     def select_random_attacker_type(self):
         choice = random.choice(list(self._unit_types))
