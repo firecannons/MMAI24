@@ -43,6 +43,7 @@ class BaseController():
         self._gold_mine_coordinates = []
         self._units = defaultdict(list)
         self._jobs_by_title = {}
+        self._enemy_castle = None
 
         for job in game.unit_jobs:
             self._jobs_by_title[job.title] = job
@@ -55,6 +56,8 @@ class BaseController():
             if self.is_gold_mine(tile):
                 self._gold_mines.append(tile)
                 self._gold_mine_coordinates.append([tile.x, tile.y])
+            if self.is_enemy_castle(tile):
+                self._enemy_castle = tile
     
         self._gold_mine_coordinates = np.asarray(self._gold_mine_coordinates)
 
@@ -79,6 +82,13 @@ class BaseController():
 
     def is_gold_mine(self, tile):
         return tile.is_gold_mine
+    
+    def is_enemy_castle(self, tile):
+        return tile.is_castle == True and tile.owner != self.player
+    
+    @property
+    def enemy_castle(self):
+        return self._enemy_castle
         
     @property
     def logger(self):
