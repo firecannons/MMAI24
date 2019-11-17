@@ -58,8 +58,7 @@ class BaseController():
             'arrow': 'arrow',
             'ballista': 'ballista',
             'cleansing': 'cleansing',
-            'aoe': 'aoe',
-            'castle': 'castle',
+            'aoe': 'aoe'
         }
         self._enemy_castle = None
         self.miners = []
@@ -96,6 +95,10 @@ class BaseController():
             choice = random.choice(list(self._tower_types))
         return choice
     
+    def select_next_tower_type(self):
+        choice = list(self._tower_types)[len(self.player.towers) % len(list(self._tower_types))]
+        return choice
+    
     def spawn_builder(self):
         if self.can_afford_unit(self._jobs_by_title[str(UnitTypes.WORKER)]) and len(self.builders) == 0:
             if self.select_spawner_for_unit(UnitTypes.WORKER).unit == None:
@@ -110,7 +113,7 @@ class BaseController():
     def build_tower(self):
         for worker in self.builders:
             if worker.tile.id == self.get_next_tower_tile(worker).id:
-                worker.build(self.select_random_tower_type())
+                worker.build(self.select_next_tower_type())
     
     def get_next_tower_tile(self, worker):
         corner_tile = self.get_tower_corner(worker)
@@ -200,7 +203,6 @@ class BaseController():
 
     def control_miners(self):
         dead_miners = []
-        print ('self.game.river_phase', self.game.river_phase)
 
         for worker in self.miners:
             if worker.tile is None:

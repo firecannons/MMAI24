@@ -40,8 +40,8 @@ class LucasController(BaseController):
             self.spawn_fisher()
             self.control_fishers()
         self.control_fishers()
-        #self.build_tower()
-        while random.randint(0, 10):
+        self.build_tower()
+        while random.randint(0, 4):
             self.spawn_attackers()
             self.move_attackers()
             self.attackers_attack()
