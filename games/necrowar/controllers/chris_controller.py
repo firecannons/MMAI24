@@ -9,11 +9,6 @@ class ChrisController(BaseController):
         logger.info(f'Starting game as {player.name}.')
 
     def run_turn(self):
+        pass
         #print('-'*140)
         #self.logger.info(f'On turn #{self.game.current_turn}')
-        
-        if not self.num_units:
-            self.spawn_unit(UnitTypes.WORKER)
-
-        for worker in self.get_units(UnitTypes.WORKER):
-            self.move_unit(worker, self.get_closest_gold_mine(worker))

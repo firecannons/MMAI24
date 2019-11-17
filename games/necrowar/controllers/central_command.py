@@ -55,6 +55,9 @@ class BaseController():
             'horseman': UnitTypes.HORSEMAN
         }
         self._enemy_castle = None
+        self.miners = []
+        self.fishers = []
+        self.builders = []
 
         for job in game.unit_jobs:
             self._jobs_by_title[job.title] = job
@@ -71,6 +74,16 @@ class BaseController():
                 self._enemy_castle = tile
     
         self._gold_mine_coordinates = np.asarray(self._gold_mine_coordinates)
+    
+        
+    def spawn_miner(self):
+        if self.can_afford_unit(self._jobs_by_title[str(UnitTypes.WORKER)]):
+            tile = self.spawn_unit(UnitTypes.WORKER)
+            self.miners.append(tile.unit)
+
+    def move_miners(self):
+        for worker in self.miners:
+            self.move_unit(worker, self.get_closest_gold_mine(worker))
     
     def select_random_attacker_type(self):
         choice = random.choice(list(self._unit_types))
