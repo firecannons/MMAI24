@@ -124,17 +124,17 @@ class BaseController():
                 tile = self.game.tiles[corner_tile.x + y * self.game.map_width]
             else:
                 if corner_tile.x < self.game.map_width / 2:
-                    x = x + 2
+                    x = x + 1
                 else:
-                    x = x - 2
+                    x = x - 1
                 if self.game.tiles[x + corner_tile.y * self.game.map_width].tower == None:
                     found_tile = True
                     tile = self.game.tiles[x + corner_tile.y * self.game.map_width]
                 else:
                     if corner_tile.y < self.game.map_height / 2:
-                        y = y + 2
+                        y = y + 1
                     else:
-                        y = y - 2
+                        y = y - 1
         return tile
     
     def get_tower_corner(self, worker):
@@ -200,20 +200,22 @@ class BaseController():
 
     def control_miners(self):
         dead_miners = []
+        print ('self.game.river_phase', self.game.river_phase)
 
         for worker in self.miners:
             if worker.tile is None:
                 dead_miners.append(worker)
                 continue
             
-            if worker.tile.is_gold_mine == True or worker.tile.is_island_gold_mine == True:
+            if self.game.current_turn != 0 and self.game.current_turn % self.game.river_phase >= self.game.river_phase - 2 and abs(worker.tile.x - self.game.map_width / 2) <= 2:
+                self.move_unit(worker, self.select_spawner_for_unit(worker.job.title), 1)
+
+            elif worker.tile.is_gold_mine == True or worker.tile.is_island_gold_mine == True:
                 worker.mine(worker.tile)
-            
-            if self.game.river_phase <= 2:
-                self.move_unit(worker, self.select_spawner_for_unit(worker.job.title))
+
             elif worker.tile.is_gold_mine == False and worker.tile.is_island_gold_mine == False:
                 self.move_unit(worker, self.get_closest_gold_mine(worker))
-        print('sadf')
+            
         for dead_miner in dead_miners:
             self.miners.remove(dead_miner)
         
@@ -423,10 +425,14 @@ class BaseController():
         goal = self.get_tile_from(goal)
 
         if path and path[0] == goal:
+            unit.move(path[0])
             return 
         
         for i in range(len(path)):
             if unit.moves <= 0:
+                break
+            
+            if number_of_moves and i >= number_of_moves:
                 break
         
             if not unit.move(path[i]):
