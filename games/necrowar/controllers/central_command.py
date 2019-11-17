@@ -205,6 +205,7 @@ class BaseController():
         f_score = defaultdict(lambda: np.inf)
         f_score[start] = f_metric(start, goal)
         priority_queue = [(f_score[start], start.id, start)]
+        unpathable = 0
 
         while priority_queue:
             _, tile_id, current_tile = heapq.heappop(priority_queue)
@@ -212,10 +213,13 @@ class BaseController():
             if current_tile == goal:
                 return self._reconstruct_path(current_tile, came_from, start)
             
-            for neighbor in current_tile.get_neighbors():
-                if not self.can_move_unit_to(neighbor, unit_type):
-                    continue
+            unpathable = 0
 
+            for neighbor in current_tile.get_neighbors():
+                if neighbor != goal and not self.can_move_unit_to(neighbor, unit_type):
+                    unpathable += 1
+                    continue
+                
                 score = g_score[current_tile] + self.move_cost(start, goal)
 
                 if score < g_score[neighbor]:
@@ -227,6 +231,10 @@ class BaseController():
                         visited.add(neighbor.id)
                         heapq.heappush(priority_queue, (f_score[neighbor], neighbor.id, neighbor))
             
+            if unpathable == len(current_tile.get_neighbors()):
+                return self._reconstruct_path(current_tile, came_from, start)
+            
+        self.logger.warn(f'Failed to find path for unit `{unit_type}`.')
         return []
 
     def move_unit(self, unit: Unit, goal, number_of_moves=None):
