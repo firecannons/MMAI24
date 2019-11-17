@@ -197,7 +197,9 @@ class BaseController():
         num_unit_on_tile[UnitTypes.GHOUL] = tile.num_ghouls
         num_unit_on_tile[UnitTypes.HOUND] = tile.num_hounds
         num_unit_on_tile[UnitTypes.ZOMBIE] = tile.num_zombies
-        
+
+        if tile.unit is not None and tile.unit.job.title != str(unit_type):
+            return False
         if not (num_unit_on_tile[unit_type] < self._jobs_by_title[str(unit_type)].per_tile):
             return False
 
