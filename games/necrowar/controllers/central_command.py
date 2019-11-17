@@ -149,12 +149,11 @@ class BaseController():
         return self.game.tiles[x + y * self.game.map_width]
 
     def spawn_fisher(self):
-        if len(self.fishers) < len(self.miners):
-            if self.can_afford_unit(self._jobs_by_title[str(UnitTypes.WORKER)]):
-                if self.select_spawner_for_unit(UnitTypes.WORKER).unit == None:
-                    tile = self.spawn_unit(UnitTypes.WORKER)
-                    if tile.unit:
-                        self.fishers.append(tile.unit)
+        if self.can_afford_unit(self._jobs_by_title[str(UnitTypes.WORKER)]):
+            if self.select_spawner_for_unit(UnitTypes.WORKER).unit == None:
+                tile = self.spawn_unit(UnitTypes.WORKER)
+                if tile.unit:
+                    self.fishers.append(tile.unit)
     
     def find_nearest_shore(self, unit):
         x = 0
@@ -178,7 +177,7 @@ class BaseController():
                 if neighbor.is_river:
                     foundwater = True
                     worker.fish(neighbor)
-            if foundwater == False:
+            if foundwater == False and worker.moves > 0:
                 self.move_unit(worker, self.find_nearest_shore(worker))
 
     def get_unoccupied_gold_mine_coordinates(self):
@@ -193,12 +192,11 @@ class BaseController():
         return indices, np.asarray(coords)
     
     def spawn_miner(self):
-        if len(self.miners) <= len(self.fishers):
-            if self.can_afford_unit(self._jobs_by_title[str(UnitTypes.WORKER)]):
-                if self.select_spawner_for_unit(UnitTypes.WORKER).unit == None:
-                    tile = self.spawn_unit(UnitTypes.WORKER)
-                    if tile.unit:
-                        self.miners.append(tile.unit)
+        if self.can_afford_unit(self._jobs_by_title[str(UnitTypes.WORKER)]):
+            if self.select_spawner_for_unit(UnitTypes.WORKER).unit == None:
+                tile = self.spawn_unit(UnitTypes.WORKER)
+                if tile.unit:
+                    self.miners.append(tile.unit)
 
     def control_miners(self):
         dead_miners = []
@@ -208,9 +206,9 @@ class BaseController():
                 dead_miners.append(worker)
                 continue
             
-            if worker.tile.is_gold_mine == True:
+            if worker.tile.is_gold_mine == True or worker.tile.is_island_gold_mine == True:
                 worker.mine(worker.tile)
-            if worker.tile.is_gold_mine == False and worker.tile.is_island_gold_mine == False:
+            if worker.tile.is_gold_mine == False and worker.tile.is_island_gold_mine == False and worker.moves > 0:
                 self.move_unit(worker, self.get_closest_gold_mine(worker))
     
         for dead_miner in dead_miners:
@@ -225,9 +223,8 @@ class BaseController():
     def get_attack_units(self):
         units = []
         for unit in self.player.units:
-            if unit.job.title != UnitTypes.WORKER:
+            if unit.job != self._jobs_by_title[str(UnitTypes.WORKER)]:
                 units.append(unit)
-        
         return units
 
     def get_closest_gold_mine(self, unit):
@@ -415,7 +412,7 @@ class BaseController():
             if unpathable == len(current_tile.get_neighbors()):
                 return self._reconstruct_path(current_tile, came_from, start)
             
-        self.logger.warn(f'Failed to find path for unit `{unit_type}`.')
+        self.logger.warn(f'Failed to find path for unit `{unit_type}`.' + str(start.unit) + ' ' + str(goal.x) + ' ' + str(goal.y))
         return []
 
     def move_unit(self, unit: Unit, goal, number_of_moves=None):

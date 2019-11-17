@@ -28,21 +28,23 @@ class LucasController(BaseController):
                         unit.attack(tile)
 
     def run_turn(self):
-        while self.can_afford_unit(self._jobs_by_title[str(UnitTypes.WORKER)]):
-            self.spawn_builder()
-            self.spawn_miner()
-            self.spawn_fisher()
-            self.control_miners()
-            self.control_fishers()
-            self.control_builders()
-            self.spawn_attackers()
+        self.spawn_builder()
+        self.control_builders()
         self.control_miners()
         self.control_fishers()
-        self.control_builders()
-        self.spawn_attackers()
+        while self.can_afford_unit(self._jobs_by_title[str(UnitTypes.WORKER)]) and len(self.miners) < 7:
+            self.spawn_miner()
+            self.control_miners()
+        self.control_miners()
+        while self.can_afford_unit(self._jobs_by_title[str(UnitTypes.WORKER)]) and len(self.fishers) < 5:
+            self.spawn_fisher()
+            self.control_fishers()
+        self.control_fishers()
         self.build_tower()
-        self.move_attackers()
-        self.attackers_attack()
+        while random.randint(0, 10):
+            self.spawn_attackers()
+            self.move_attackers()
+            self.attackers_attack()
         self.towers_attack()
         self.enemy_health = self.enemy_castle.tower.health
         self.turn = self.game.current_turn
