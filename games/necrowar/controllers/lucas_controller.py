@@ -28,7 +28,7 @@ class LucasController(BaseController):
 
     def run_turn(self):
         self.spawn_miner()
-        self.move_miners()
+        self.control_miners()
         self.spawn_attackers()
         self.move_attackers()
         self.attackers_attack()
