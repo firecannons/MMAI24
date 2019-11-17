@@ -63,6 +63,8 @@ class AI(BaseAI):
         for i in range(1, len(controllers)):
             self.base_controller.add_controller(controllers[i])
         
+        self.lc = self.base_controller.controllers[1]
+        
     def game_updated(self):
         """ This is called every time the game's state updates, so if you are
         tracking anything you can update it here.
@@ -72,6 +74,7 @@ class AI(BaseAI):
         # <<-- /Creer-Merge: game-updated -->>
 
     def end(self, won, reason):
+        self.lc.end_game()
         """ This is called when the game ends, you can clean up your data and
             dump files here if need be.
 

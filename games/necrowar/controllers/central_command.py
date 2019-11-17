@@ -87,7 +87,7 @@ class BaseController():
             for unit in self.player.opponent.units:
                 a = abs(tower.tile.x - unit.tile.x)
                 b = abs(tower.tile.y - unit.tile.y)
-                if a + b <= tower.job.range:
+                if a + b <= tower.job.range or unit.tile in tower.tile.get_neighbors():
                     tower.attack(unit.tile)
     
     def select_random_tower_type(self):
@@ -106,6 +106,9 @@ class BaseController():
     def control_builders(self):
         for worker in self.builders:
             self.move_unit(worker, self.get_next_tower_tile(worker))
+    
+    def build_tower(self):
+        for worker in self.builders:
             if worker.tile.id == self.get_next_tower_tile(worker).id:
                 worker.build(self.select_random_tower_type())
     
@@ -146,11 +149,12 @@ class BaseController():
         return self.game.tiles[x + y * self.game.map_width]
 
     def spawn_fisher(self):
-        if self.can_afford_unit(self._jobs_by_title[str(UnitTypes.WORKER)]):
-            if self.select_spawner_for_unit(UnitTypes.WORKER).unit == None:
-                tile = self.spawn_unit(UnitTypes.WORKER)
-                if tile.unit:
-                    self.fishers.append(tile.unit)
+        if len(self.fishers) < len(self.miners):
+            if self.can_afford_unit(self._jobs_by_title[str(UnitTypes.WORKER)]):
+                if self.select_spawner_for_unit(UnitTypes.WORKER).unit == None:
+                    tile = self.spawn_unit(UnitTypes.WORKER)
+                    if tile.unit:
+                        self.fishers.append(tile.unit)
     
     def find_nearest_shore(self, unit):
         x = 0
@@ -189,11 +193,12 @@ class BaseController():
         return indices, np.asarray(coords)
     
     def spawn_miner(self):
-        if self.can_afford_unit(self._jobs_by_title[str(UnitTypes.WORKER)]):
-            if self.select_spawner_for_unit(UnitTypes.WORKER).unit == None:
-                tile = self.spawn_unit(UnitTypes.WORKER)
-                if tile.unit:
-                    self.miners.append(tile.unit)
+        if len(self.miners) <= len(self.fishers):
+            if self.can_afford_unit(self._jobs_by_title[str(UnitTypes.WORKER)]):
+                if self.select_spawner_for_unit(UnitTypes.WORKER).unit == None:
+                    tile = self.spawn_unit(UnitTypes.WORKER)
+                    if tile.unit:
+                        self.miners.append(tile.unit)
 
     def control_miners(self):
         dead_miners = []
