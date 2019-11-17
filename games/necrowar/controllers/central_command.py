@@ -92,12 +92,21 @@ class BaseController():
             self.miners.append(tile.unit)
 
     def control_miners(self):
+        dead_miners = []
+
         for worker in self.miners:
+            if worker.tile is None:
+                dead_miners.append(worker)
+                continue
+            
             if worker.tile.is_gold_mine == True:
                 worker.mine(worker.tile)
             if worker.tile.is_gold_mine == False and worker.tile.is_island_gold_mine == False:
                 self.move_unit(worker, self.get_closest_gold_mine(worker))
     
+        for dead_miner in dead_miners:
+            self.miners.remove(dead_miner)
+        
     def select_random_attacker_type(self):
         choice = random.choice(list(self._unit_types))
         while choice == UnitTypes.WORKER:
