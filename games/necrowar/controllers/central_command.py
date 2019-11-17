@@ -54,6 +54,13 @@ class BaseController():
             'wraith': UnitTypes.WRAITH,
             'horseman': UnitTypes.HORSEMAN
         }
+        self._tower_types = {
+            'arrow': 'arrow',
+            'ballista': 'ballista',
+            'cleansing': 'cleansing',
+            'aoe': 'aoe',
+            'castle': 'castle',
+        }
         self._enemy_castle = None
         self.miners = []
         self.fishers = []
@@ -74,11 +81,68 @@ class BaseController():
                 self._enemy_castle = tile
     
         self._gold_mine_coordinates = np.asarray(self._gold_mine_coordinates)
-        
+    
+    def select_random_tower_type(self):
+        choice = random.choice(list(self._tower_types))
+        while choice == 'castle':
+            choice = random.choice(list(self._tower_types))
+        return choice
+    
+    def spawn_builder(self):
+        if self.can_afford_unit(self._jobs_by_title[str(UnitTypes.WORKER)]) and len(self.builders) == 0:
+            if self.select_spawner_for_unit(UnitTypes.WORKER).unit == None:
+                tile = self.spawn_unit(UnitTypes.WORKER)
+                if tile.unit:
+                    self.builders.append(tile.unit)
+    
+    def control_builders(self):
+        for worker in self.builders:
+            self.move_unit(worker, self.get_next_tower_tile(worker))
+            if worker.tile.id == self.get_next_tower_tile(worker).id:
+                worker.build(self.select_random_tower_type())
+    
+    def get_next_tower_tile(self, worker):
+        corner_tile = self.get_tower_corner(worker)
+        x = corner_tile.x
+        y = corner_tile.y
+        found_tile = False
+        tile = None
+        while found_tile == False:
+            if self.game.tiles[corner_tile.x + y * self.game.map_width].tower == None:
+                found_tile = True
+                tile = self.game.tiles[corner_tile.x + y * self.game.map_width]
+            else:
+                if corner_tile.x < self.game.map_width / 2:
+                    x = x + 1
+                else:
+                    x = x - 1
+                if self.game.tiles[x + corner_tile.y * self.game.map_width].tower == None:
+                    found_tile = True
+                    tile = self.game.tiles[x + corner_tile.y * self.game.map_width]
+                else:
+                    if corner_tile.y < self.game.map_height / 2:
+                        y = y + 1
+                    else:
+                        y = y - 1
+        return tile
+    
+    def get_tower_corner(self, worker):
+        x = 0
+        y = 0
+        if worker.tile.x < self.game.map_width / 2:
+            x = 7
+            y = self.game.map_height - 7 - 1
+        else:
+            x = self.game.map_width - 7 - 1
+            y = 7
+        return self.game.tiles[x + y * self.game.map_width]
+
     def spawn_fisher(self):
         if self.can_afford_unit(self._jobs_by_title[str(UnitTypes.WORKER)]):
-            tile = self.spawn_unit(UnitTypes.WORKER)
-            self.fishers.append(tile.unit)
+            if self.select_spawner_for_unit(UnitTypes.WORKER).unit == None:
+                tile = self.spawn_unit(UnitTypes.WORKER)
+                if tile.unit:
+                    self.fishers.append(tile.unit)
     
     def find_nearest_shore(self, unit):
         x = 0
@@ -115,10 +179,13 @@ class BaseController():
                 indices.append(i)
 
         return indices, np.asarray(coords)
+    
     def spawn_miner(self):
         if self.can_afford_unit(self._jobs_by_title[str(UnitTypes.WORKER)]):
-            tile = self.spawn_unit(UnitTypes.WORKER)
-            self.miners.append(tile.unit)
+            if self.select_spawner_for_unit(UnitTypes.WORKER).unit == None:
+                tile = self.spawn_unit(UnitTypes.WORKER)
+                if tile.unit:
+                    self.miners.append(tile.unit)
 
     def control_miners(self):
         dead_miners = []
