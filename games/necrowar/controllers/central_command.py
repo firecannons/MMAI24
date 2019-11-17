@@ -75,7 +75,36 @@ class BaseController():
     
         self._gold_mine_coordinates = np.asarray(self._gold_mine_coordinates)
     
-        
+    def spawn_fisher(self):
+        if self.can_afford_unit(self._jobs_by_title[str(UnitTypes.WORKER)]):
+            tile = self.spawn_unit(UnitTypes.WORKER)
+            self.fishers.append(tile.unit)
+    
+    def find_nearest_shore(self, unit):
+        x = 0
+        y = unit.tile.y
+        if unit.tile.x > self.game._map_width / 2:
+            x = int(self.game._map_width / 2) + 2
+        else:
+            x = int(self.game._map_width / 2) - 2
+        if unit.tile.y < self.game._map_height / 2:
+            while self.game.tiles[x + y * self.game.map_width].unit:
+                y = y + 1
+        else:
+            while self.game.tiles[x + y * self.game.map_width].unit:
+                y = y - 1
+        return self.game.tiles[x + y * self.game.map_width]
+
+    def control_fishers(self):
+        for worker in self.fishers:
+            foundwater = False
+            for neighbor in worker.tile.get_neighbors():
+                if neighbor.is_river:
+                    foundwater = True
+                    worker.fish(neighbor)
+            if foundwater == False:
+                self.move_unit(worker, self.find_nearest_shore(worker))
+
     def spawn_miner(self):
         if self.can_afford_unit(self._jobs_by_title[str(UnitTypes.WORKER)]):
             tile = self.spawn_unit(UnitTypes.WORKER)

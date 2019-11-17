@@ -2,6 +2,7 @@ import logging
 from ..game import Game
 from ..player import Player
 from .central_command import BaseController, UnitTypes
+import random
 
 class LucasController(BaseController):
     def __init__(self, logger: logging.Logger, game: Game, player: Player):
@@ -27,8 +28,12 @@ class LucasController(BaseController):
                         unit.attack(tile)
 
     def run_turn(self):
-        self.spawn_miner()
+        if random.randint(0, 3) == 1:
+            self.spawn_fisher()
+        else:
+            self.spawn_miner()
         self.control_miners()
+        self.control_fishers()
         self.spawn_attackers()
         self.move_attackers()
         self.attackers_attack()
