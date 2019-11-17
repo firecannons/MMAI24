@@ -126,10 +126,10 @@ class BaseController():
                 found_tile = True
                 tile = self.game.tiles[corner_tile.x + y * self.game.map_width]
             else:
-                if corner_tile.x < self.game.map_width / 2:
+                '''if corner_tile.x < self.game.map_width / 2:
                     x = x + 1
                 else:
-                    x = x - 1
+                    x = x - 1'''
                 if self.game.tiles[x + corner_tile.y * self.game.map_width].tower == None:
                     found_tile = True
                     tile = self.game.tiles[x + corner_tile.y * self.game.map_width]
@@ -145,10 +145,10 @@ class BaseController():
         y = 0
         if worker.tile.x < self.game.map_width / 2:
             x = 7
-            y = self.game.map_height - 7 - 1
+            y = 8
         else:
             x = self.game.map_width - 7 - 1
-            y = 7
+            y = self.game.map_height - 7 - 2
         return self.game.tiles[x + y * self.game.map_width]
 
     def spawn_fisher(self):
